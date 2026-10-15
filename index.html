@@ -42,7 +42,7 @@
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--f-body);
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 32px;display:grid;gap:16px}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 32px;display:grid;gap:12px}
 button,select,input{font:inherit;color:inherit}
 button{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;min-height:40px}
 button:hover{border-color:var(--accent)}
@@ -68,18 +68,21 @@ button[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-colo
 .alert p{white-space:pre-wrap;font-size:13px;margin:8px 0 0;max-width:80ch}
 
 /* tiles */
-.tiles{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
-.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:8px;align-content:start;min-width:0}
-.tile header{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.tile h2{margin:0;font:600 12px/1 var(--f-body);text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
-.chip{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+/* Six tiles: 3 columns x 2 rows from iPad portrait up, so tiles + map fit one screen */
+.tiles{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:740px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.tiles{grid-template-columns:1fr}}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;display:grid;gap:6px;align-content:start;min-width:0}
+.tile header{display:flex;justify-content:space-between;align-items:center;gap:6px;min-width:0}
+.tile h2{margin:0;font:600 11.5px/1.1 var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:0}
+.chip{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
 .chip.ok{color:var(--ok)}.chip.warn{color:var(--warn)}.chip.bad{color:var(--bad)}
-.big{display:flex;align-items:center;gap:14px}
-.num{font:600 46px/1 var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.num small{font-size:18px;font-weight:500;color:var(--muted);margin-left:3px}
-.big .side{font-size:14px;line-height:1.35;min-width:0}
-.big .side b{font:600 20px/1 var(--f-num)}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:13.5px}
+.big{display:flex;align-items:center;gap:10px;min-height:52px}
+.num{font:600 38px/1 var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+.num small{font-size:16px;font-weight:500;color:var(--muted);margin-left:2px}
+.big .side{font-size:13px;line-height:1.3;min-width:0}
+.big .side b{font:600 17px/1 var(--f-num)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0;font-size:13px}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
 .compass{flex:none}
@@ -103,10 +106,13 @@ button[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-colo
 .tip .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
 
 /* radar map */
-.mapHead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
-.mapHead h2{margin:0;font:600 20px/1.2 var(--f-num)}
-.frame{display:inline-flex;align-items:center;min-height:40px;padding:0 6px;font:600 15px var(--f-num);font-variant-numeric:tabular-nums;min-width:120px}
-#map{height:min(62vh,520px);min-height:300px;border-radius:10px;border:1px solid var(--line);margin-top:8px;background:var(--bg)}
+.mapHead{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between}
+.mapHead h2{margin:0;font:600 18px/1.2 var(--f-num)}
+.mapHead .actions{gap:6px}
+.mapHead button{min-height:34px;padding:4px 10px;font-size:14px}
+.frame{display:inline-flex;align-items:center;min-height:34px;padding:0 4px;font:600 14px var(--f-num);font-variant-numeric:tabular-nums;min-width:118px}
+#radarPanel{padding-block:10px}
+#map{height:clamp(240px,32vh,400px);border-radius:10px;border:1px solid var(--line);margin-top:6px;background:var(--bg)}
 :root[data-night="on"] #map{filter:grayscale(1) sepia(1) hue-rotate(-50deg) saturate(5) brightness(.55)}
 .leaflet-container{font:13px var(--f-body);background:var(--bg)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .base-tiles{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}}
@@ -119,8 +125,8 @@ button[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-colo
 .warn-poly.tornado{stroke:var(--bad);fill:var(--bad);fill-opacity:.25;stroke-width:3}
 .pt-berth{stroke:var(--panel);fill:var(--accent);fill-opacity:1;stroke-width:2}
 .pt-sea{stroke:var(--panel);fill:var(--c-wave);fill-opacity:1;stroke-width:2}
-.mapFoot{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
-.dbz{display:grid;gap:3px;min-width:220px;flex:1 1 220px;max-width:340px}
+.mapFoot{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
+.dbz{display:grid;gap:2px;min-width:200px;flex:1 1 200px;max-width:300px}
 .dbz .bar{height:10px;border-radius:3px;background:linear-gradient(90deg,#9be38f,#36b53b,#1c7f1f,#f2e641,#f6a623,#e5301f,#b4122a,#d43fd0)}
 .dbz .ticks{display:flex;justify-content:space-between;font-size:11.5px}
 .mapFoot .k{display:inline-flex;align-items:center;gap:6px}
@@ -136,12 +142,9 @@ td.n{font:600 16px var(--f-num)}
 td .m{color:var(--muted);font:400 13px var(--f-body)}
 .s-ok{color:var(--ok)}.s-warn{color:var(--warn)}.s-bad{color:var(--bad)}
 
-/* settings */
-#settings{background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:16px;display:grid;gap:12px}
-#settings h2{margin:0;font:600 20px var(--f-num)}
-.form{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
-.form label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
-.form input,.form select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px;color:var(--ink)}
+/* location picker */
+.loc select{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px;color:var(--ink);max-width:250px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .hint{font-size:13px;color:var(--muted);margin:0;max-width:75ch}
 a{color:var(--accent)}
 
@@ -156,40 +159,19 @@ a{color:var(--accent)}
 <body>
 <div class="wrap">
   <div class="top">
-    <div>
-      <h1 id="placeName">Ancon Conditions</h1>
+    <div class="ttl">
+      <h1>Ancon</h1>
       <div class="sub" id="updated">Loading live data…</div>
     </div>
     <div class="actions">
+      <label class="loc" for="locSel"><span class="vh">Location</span><select id="locSel"></select></label>
       <button id="btnRefresh" type="button">Refresh</button>
-      <button id="btnNight" type="button" aria-pressed="false">Night red</button>
-      <button id="btnWake" type="button" aria-pressed="false">Keep screen on</button>
-      <button id="btnPlace" type="button" aria-expanded="false">Location</button>
+      <button id="btnNight" type="button" aria-pressed="false">Night</button>
+      <button id="btnWake" type="button" aria-pressed="false">Screen on</button>
     </div>
   </div>
 
-  <section id="settings" hidden>
-    <h2>Location</h2>
-    <div class="form">
-      <label for="fPreset">Preset
-        <select id="fPreset"></select></label>
-      <label for="fName">Name<input id="fName" type="text"></label>
-      <label for="fLat">Weather latitude<input id="fLat" type="number" step="0.001" inputmode="decimal"></label>
-      <label for="fLon">Weather longitude<input id="fLon" type="number" step="0.001" inputmode="decimal"></label>
-      <label for="fMlat">Seas latitude (open water)<input id="fMlat" type="number" step="0.01" inputmode="decimal"></label>
-      <label for="fMlon">Seas longitude (open water)<input id="fMlon" type="number" step="0.01" inputmode="decimal"></label>
-      <label for="fSea">Seas area label<input id="fSea" type="text"></label>
-      <label for="fStation">NOAA tide station ID<input id="fStation" type="text" inputmode="numeric"></label>
-    </div>
-    <p class="hint">Seas come from a wave model that has no data inside bays and marinas, so set the seas point a few miles offshore. Find a tide station ID on the <a href="https://tidesandcurrents.noaa.gov/map/" target="_blank" rel="noopener">NOAA Tides &amp; Currents map</a>.</p>
-    <div class="actions">
-      <button id="btnSave" type="button">Save and load</button>
-      <button id="btnGeo" type="button">Use this iPad's position</button>
-      <button id="btnClose" type="button">Close</button>
-      <span id="geoMsg" class="hint"></span>
-    </div>
-  </section>
-
+  <div id="locMsg" class="banner stale" hidden></div>
   <div id="stale" class="banner stale" hidden></div>
   <div id="alerts"></div>
 
@@ -198,7 +180,8 @@ a{color:var(--accent)}
     <section class="tile" id="tSea"><header><h2>Seas</h2><span class="chip" hidden></span></header><div class="body">—</div></section>
     <section class="tile" id="tRain"><header><h2>Rain</h2><span class="chip" hidden></span></header><div class="body">—</div></section>
     <section class="tile" id="tTide"><header><h2>Tide</h2><span class="chip" hidden></span></header><div class="body">—</div></section>
-    <section class="tile" id="tAir"><header><h2>Sky &amp; pressure</h2><span class="chip" hidden></span></header><div class="body">—</div></section>
+    <section class="tile" id="tSky"><header><h2>Sky</h2><span class="chip" hidden></span></header><div class="body">—</div></section>
+    <section class="tile" id="tPress"><header><h2>Pressure &amp; visibility</h2><span class="chip" hidden></span></header><div class="body">—</div></section>
   </div>
 
   <section class="panel" id="radarPanel">
@@ -217,7 +200,7 @@ a{color:var(--accent)}
       <div class="dbz"><div class="bar"></div><div class="ticks"><span>Light</span><span>Moderate</span><span>Heavy</span><span>Storm cores, hail</span></div></div>
       <span class="k"><i></i>Severe thunderstorm or tornado warning</span>
       <span class="k"><i class="w"></i>Special marine warning</span>
-      <span>Red and purple cores on radar are usually thunderstorms. Live lightning strikes: <a href="https://www.lightningmaps.org/" target="_blank" rel="noopener">LightningMaps.org</a></span>
+      <span>Red and purple cores are usually thunderstorms. Lightning: <a href="https://www.lightningmaps.org/" target="_blank" rel="noopener">LightningMaps.org</a></span>
     </div>
   </section>
 
@@ -243,8 +226,8 @@ a{color:var(--accent)}
 <script>
 "use strict";
 const PRESETS = [
-  {id:"westshore", name:"Westshore Yacht Club, Tampa Bay", lat:27.893, lon:-82.531, mlat:27.60, mlon:-82.95, seaLabel:"Gulf, off Egmont Key", station:"8726607"},
-  {id:"palmettobay", name:"Palmetto Bay Marina, Hilton Head", lat:32.178, lon:-80.772, mlat:32.02, mlon:-80.66, seaLabel:"Atlantic, off Calibogue Sound", station:"8669338"}
+  {id:"westshore", name:"Westshore Yacht Club, Tampa Bay", short:"Westshore YC · Tampa Bay", lat:27.893, lon:-82.531, mlat:27.60, mlon:-82.95, seaLabel:"Gulf, off Egmont Key", station:"8726607"},
+  {id:"palmettobay", name:"Palmetto Bay Marina, Hilton Head", short:"Palmetto Bay · Hilton Head", lat:32.178, lon:-80.772, mlat:32.02, mlon:-80.66, seaLabel:"Atlantic, off Calibogue Sound", station:"8669338"}
 ];
 const LS = {
   get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
@@ -252,7 +235,10 @@ const LS = {
 };
 const $ = s => document.querySelector(s);
 const H = 3600e3;
-let place = LS.get("ancon.place") || PRESETS[0];
+/* mode is a preset id, or "follow" to track the iPad's position */
+let mode = LS.get("ancon.mode") || "westshore";
+if(mode !== "follow" && !PRESETS.some(p => p.id === mode)) mode = PRESETS[0].id;
+let place = (mode === "follow" && LS.get("ancon.followPlace")) || PRESETS.find(p => p.id === mode) || PRESETS[0];
 let D = {err:{}, at:{}};
 let TZ, OFF = -new Date().getTimezoneOffset()*60e3;
 
@@ -282,7 +268,7 @@ function omURL(base, p){
 }
 const wxURL = p => omURL("https://api.open-meteo.com/v1/forecast", {
   latitude:p.lat, longitude:p.lon,
-  current:"temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,precipitation",
+  current:"temperature_2m,apparent_temperature,relative_humidity_2m,dew_point_2m,cloud_cover,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,precipitation",
   hourly:"temperature_2m,precipitation_probability,precipitation,weather_code,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility",
   daily:"weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,sunrise,sunset",
   wind_speed_unit:"kn", temperature_unit:"fahrenheit", precipitation_unit:"inch",
@@ -497,19 +483,21 @@ function setTile(id, chip, html){
 function compassSVG(deg, color){
   const ticks = [0,45,90,135,180,225,270,315].map(a => `<line x1="0" y1="-27" x2="0" y2="${a%90?-24:-22}" stroke="var(--muted)" stroke-width="${a%90?1:1.6}" transform="rotate(${a})"/>`).join("");
   const arrow = deg==null ? "" : `<g transform="rotate(${(deg+180)%360})"><path d="M0 -20 L7 8 L0 3 L-7 8 Z" fill="${color}"/></g>`;
-  return `<svg class="compass" width="64" height="64" viewBox="-32 -32 64 64" aria-hidden="true"><circle r="27" fill="none" stroke="var(--line)" stroke-width="1.5"/>${ticks}<text x="0" y="-12" text-anchor="middle" style="font:600 9px var(--f-body);fill:var(--muted)">N</text>${arrow}</svg>`;
+  return `<svg class="compass" width="52" height="52" viewBox="-32 -32 64 64" aria-hidden="true"><circle r="27" fill="none" stroke="var(--line)" stroke-width="1.5"/>${ticks}<text x="0" y="-12" text-anchor="middle" style="font:600 9px var(--f-body);fill:var(--muted)">N</text>${arrow}</svg>`;
 }
 function kv(rows){ return `<dl class="kv">${rows.map(([a,b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>`; }
 
 function render(){
   const now = Date.now();
   if(D.wx){ TZ = D.wx.timezone; OFF = D.wx.utc_offset_seconds*1000; }
-  $("#placeName").textContent = place.name || "Ancon Conditions";
   document.title = "Ancon · " + (place.name || "Conditions");
   $("#nwsLink").href = `https://marine.weather.gov/MapClick.php?lat=${place.mlat}&lon=${place.mlon}`;
   $("#seaLab").textContent = place.seaLabel ? "Model point: " + place.seaLabel : "";
   const freshest = Math.max(0, ...Object.values(D.at));
-  $("#updated").innerHTML = freshest ? `Updated <b>${tm(freshest)}</b> · ${fmt(now,{weekday:"long",month:"short",day:"numeric"})}` : "No data yet. Check the connection and tap Refresh.";
+  const follow = mode === "follow"
+    ? ` · ${place.id === "follow" ? (place.stationName ? `tides from ${place.stationName}` : "no tide station within 60 nm") : "waiting for GPS"}${lastFix ? ` · GPS ${ago(lastFix)}` : ""}` : "";
+  $("#updated").innerHTML = (freshest ? `Updated <b>${tm(freshest)}</b> · ${fmt(now,{weekday:"short",month:"short",day:"numeric"})}` : "No data yet. Check the connection and tap Refresh.") + follow;
+  const lm = $("#locMsg"); lm.hidden = !geoMsg; lm.textContent = geoMsg;
   const failed = Object.keys(D.err).filter(k => D.err[k] && D.at[k]);
   const st = $("#stale");
   if(failed.length){ st.hidden = false; st.textContent = `Couldn't reach every source. Some panels show saved data from ${ago(Math.min(...failed.map(k => D.at[k])))}.`; }
@@ -644,7 +632,7 @@ function renderTiles(now){
     setTile("#tWind", [state(c.wind_gusts_10m,20,30), `F${b} ${BFTN[b]}`],
       `<div class="big">${compassSVG(c.wind_direction_10m,"var(--c-wind)")}<div><div class="num">${r0(c.wind_speed_10m)}<small>kt</small></div></div>
        <div class="side">from <b>${cmp(c.wind_direction_10m)}</b><br>${r0(c.wind_direction_10m)}° true</div></div>` +
-      kv([["Gusts now", `${r0(c.wind_gusts_10m)} kt`], ["Max gust, next 12 h", gAt ? `${r0(gMax)} kt at ${tm(gAt)}` : "—"]]));
+      kv([["Gusts now", `${r0(c.wind_gusts_10m)} kt`], ["Max gust, 12 h", gAt ? `${r0(gMax)} kt · ${tm(gAt)}` : "—"]]));
   } else setTile("#tWind", null, "Wind data unavailable.");
 
   /* seas */
@@ -657,10 +645,9 @@ function renderTiles(now){
       `<div class="big">${compassSVG(c.wave_direction,"var(--c-wave)")}<div><div class="num">${r1(wf)}<small>ft</small></div></div>
        <div class="side"><b>${r0(c.wave_period)} s</b><br>from ${cmp(c.wave_direction)}</div></div>` +
       kv([["Swell", `${r1(ft(c.swell_wave_height))} ft · ${r0(c.swell_wave_period)} s · ${cmp(c.swell_wave_direction)}`],
-          ["Wind waves", `${r1(ft(c.wind_wave_height))} ft`],
-          ["Max, next 24 h", mAt ? `${r1(ft(mx))} ft at ${tmD(mAt)}` : "—"],
-          ["Water temp", c.sea_surface_temperature != null ? `${r0(cToF(c.sea_surface_temperature))} °F` : "—"]]));
-  } else setTile("#tSea", null, D.sea ? "The wave model has no data at this point. Move the seas point further offshore under Location." : "Sea data unavailable.");
+          ["Max, 24 h", mAt ? `${r1(ft(mx))} ft · ${tmD(mAt)}` : "—"],
+          ["Water", c.sea_surface_temperature != null ? `${r0(cToF(c.sea_surface_temperature))} °F` : "—"]]));
+  } else setTile("#tSea", null, D.sea ? "The wave model has no data at this point (it doesn't cover bays and marinas)." : "Sea data unavailable.");
 
   /* rain */
   if(D.wx){
@@ -677,8 +664,8 @@ function renderTiles(now){
     setTile("#tRain", chip,
       `<div class="big"><div><div class="num">${r0(p6)}<small>%</small></div></div><div class="side">highest chance<br><b>next 6 h</b></div></div>` +
       kv([["Next 24 h", `${r0(p24)}% · ${r1(amt24)} in`],
-          ["50% or more from", firstLikely ? tmD(firstLikely) : "not in next 24 h"],
-          ["Thunderstorms", storm ? `forecast from ${tmD(storm)}` : "none in next 12 h"]]));
+          ["50%+ from", firstLikely ? tmD(firstLikely) : "not in 24 h"],
+          ["Thunder", storm ? `from ${tmD(storm)}` : "none in 12 h"]]));
   } else setTile("#tRain", null, "Rain data unavailable.");
 
   /* tide */
@@ -699,19 +686,36 @@ function renderTiles(now){
           ["Measured", obs]]));
   } else setTile("#tTide", null, D.err.hilo ? `Tide data unavailable (${D.err.hilo}).` : "Tide data unavailable.");
 
-  /* sky & pressure */
+  /* sky */
+  if(D.wx && D.wx.current){
+    const c = D.wx.current;
+    const dk = dayKey(now), di = D.wx.daily.time.findIndex(s => dayKey(s*1000) === dk);
+    const code = c.weather_code;
+    const chip = code >= 95 ? ["bad","Thunderstorm"] : (code === 45 || code === 48) ? ["warn","Fog"] : null;
+    setTile("#tSky", chip,
+      `<div class="big"><div><div class="num">${r0(c.temperature_2m)}<small>°F</small></div></div><div class="side"><b>${wmo(code)}</b><br>feels like ${r0(c.apparent_temperature)}°</div></div>` +
+      kv([["Humidity", `${r0(c.relative_humidity_2m)}% · dew pt ${r0(c.dew_point_2m)}°`],
+          ["Cloud cover", `${r0(c.cloud_cover)}%`],
+          ["Sun", di >= 0 ? `↑ ${tm(D.wx.daily.sunrise[di]*1000)} · ↓ ${tm(D.wx.daily.sunset[di]*1000)}` : "—"]]));
+  } else setTile("#tSky", null, "Weather data unavailable.");
+
+  /* pressure & visibility */
   if(D.wx && D.wx.current){
     const c = D.wx.current, h = D.wx.hourly, t = hourlyT(D.wx), i = idxAt(t, now);
+    const sgn = v => v == null ? "—" : `${v >= 0 ? "+" : ""}${r1(v)} mb`;
     const p3 = i >= 3 ? h.pressure_msl[i] - h.pressure_msl[i-3] : null;
+    const p12 = i >= 12 ? h.pressure_msl[i] - h.pressure_msl[i-12] : null;
+    const f12 = i+12 < t.length ? h.pressure_msl[i+12] - h.pressure_msl[i] : null;
     const vis = h.visibility[i] != null ? h.visibility[i]/1852 : null;
-    const dk = dayKey(now), di = D.wx.daily.time.findIndex(s => dayKey(s*1000) === dk);
-    const chip = p3 != null && p3 <= -3 ? ["bad","Pressure falling fast"] : p3 != null && p3 <= -1.5 ? ["warn","Pressure falling"] : null;
-    setTile("#tAir", chip,
-      `<div class="big"><div><div class="num">${r0(c.temperature_2m)}<small>°F</small></div></div><div class="side"><b>${wmo(c.weather_code)}</b><br>humidity ${r0(c.relative_humidity_2m)}%</div></div>` +
-      kv([["Pressure", `${r0(c.pressure_msl)} mb${p3!=null ? ` · ${p3>=0?"+":""}${r1(p3)} in 3 h` : ""}`],
-          ["Visibility", vis != null ? (vis >= 10 ? "10+ nm" : `${r1(vis)} nm`) : "—"],
-          ["Sunrise · sunset", di >= 0 ? `${tm(D.wx.daily.sunrise[di]*1000)} · ${tm(D.wx.daily.sunset[di]*1000)}` : "—"]]));
-  } else setTile("#tAir", null, "Weather data unavailable.");
+    const trend = p3 == null ? "" : p3 <= -1.5 ? "falling" : p3 >= 1.5 ? "rising" : "steady";
+    const chip = p3 != null && p3 <= -3 ? ["bad","Falling fast"] : p3 != null && p3 <= -1.5 ? ["warn","Falling"]
+      : vis != null && vis < 2 ? ["warn","Low visibility"] : p3 != null ? ["ok", p3 >= 1.5 ? "Rising" : "Steady"] : null;
+    setTile("#tPress", chip,
+      `<div class="big"><div><div class="num">${r0(c.pressure_msl)}<small>mb</small></div></div><div class="side"><b>${sgn(p3)}</b><br>last 3 h${trend ? ", " + trend : ""}</div></div>` +
+      kv([["Last 12 h", sgn(p12)],
+          ["Forecast next 12 h", sgn(f12)],
+          ["Visibility", vis != null ? (vis >= 10 ? "10+ nm" : `${r1(vis)} nm`) : "—"]]));
+  } else setTile("#tPress", null, "Weather data unavailable.");
 }
 
 function renderCharts(now){
@@ -799,42 +803,76 @@ function renderSources(){
   }).join("");
 }
 
-/* ---------- settings ---------- */
-const F = ["Name","Lat","Lon","Mlat","Mlon","Sea","Station"];
-const KEYS = {Name:"name",Lat:"lat",Lon:"lon",Mlat:"mlat",Mlon:"mlon",Sea:"seaLabel",Station:"station"};
-function fillForm(p){ F.forEach(f => { $("#f"+f).value = p[KEYS[f]] != null ? p[KEYS[f]] : ""; }); }
-function openSettings(open){
-  $("#settings").hidden = !open; $("#btnPlace").setAttribute("aria-expanded", String(open));
-  if(open){
-    const sel = $("#fPreset");
-    sel.innerHTML = PRESETS.map(p => `<option value="${p.id}">${p.name}</option>`).join("") + `<option value="custom">Custom</option>`;
-    sel.value = PRESETS.some(p => p.id === place.id) ? place.id : "custom";
-    fillForm(place);
-  }
+/* ---------- location: presets or follow the iPad ---------- */
+let watchId = null, lastFix = LS.get("ancon.lastFix"), geoMsg = "", fixBusy = false;
+function distNm(a1, o1, a2, o2){
+  const r = Math.PI/180, dA = (a2-a1)*r, dO = (o2-o1)*r;
+  const x = Math.sin(dA/2)**2 + Math.cos(a1*r)*Math.cos(a2*r)*Math.sin(dO/2)**2;
+  return 3440.065 * 2 * Math.asin(Math.sqrt(x));
 }
-$("#fPreset").addEventListener("change", e => { const p = PRESETS.find(x => x.id === e.target.value); if(p) fillForm(p); });
-$("#btnSave").addEventListener("click", () => {
-  const p = {}; F.forEach(f => { p[KEYS[f]] = $("#f"+f).value.trim(); });
-  ["lat","lon","mlat","mlon"].forEach(k => p[k] = parseFloat(p[k]));
-  if(["lat","lon","mlat","mlon"].some(k => isNaN(p[k]))){ $("#geoMsg").textContent = "Enter all four coordinates as decimal degrees (west longitudes are negative)."; return; }
-  const pre = PRESETS.find(x => x.id === $("#fPreset").value);
-  p.id = pre && placeKey(pre) === placeKey(p) ? pre.id : "custom";
-  place = p; LS.set("ancon.place", p); openSettings(false); D = {err:{}, at:{}}; render(); load();
+const titleCase = s => String(s||"").toLowerCase().replace(/\b\w/g, ch => ch.toUpperCase());
+async function stationList(){
+  const c = LS.get("ancon.stations");
+  if(c && c.s && c.s.length && Date.now() - c.at < 30*24*H) return c.s;
+  try{
+    const j = await getJSON("https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json?type=tidepredictions");
+    const s = (j.stations||[]).map(x => [x.id, titleCase(x.name), +(+x.lat).toFixed(4), +(+x.lng).toFixed(4)]);
+    LS.set("ancon.stations", {at:Date.now(), s}); return s;
+  }catch(e){ return (c && c.s) || []; }
+}
+async function nearestStation(la, lo){
+  let best = null, bd = Infinity;
+  (await stationList()).forEach(([id, name, a, o]) => { const d = distNm(la, lo, a, o); if(d < bd){ bd = d; best = {id, name, d}; } });
+  return best && bd <= 60 ? best : null;
+}
+/* Build a place from a GPS fix. Near a preset (40 nm), reuse its offshore seas point, since the wave model has no data in bays. */
+async function placeFromFix(la, lo){
+  const st = await nearestStation(la, lo);
+  let near = null, nd = Infinity;
+  PRESETS.forEach(p => { const d = distNm(la, lo, p.lat, p.lon); if(d < nd){ nd = d; near = p; } });
+  const useP = near && nd <= 40;
+  return {id:"follow", name:"Current position", lat:+la.toFixed(3), lon:+lo.toFixed(3),
+    mlat: useP ? near.mlat : +la.toFixed(2), mlon: useP ? near.mlon : +lo.toFixed(2),
+    seaLabel: useP ? near.seaLabel : "at your position", station: st ? st.id : "", stationName: st ? st.name : ""};
+}
+async function onFix(pos){
+  lastFix = Date.now(); LS.set("ancon.lastFix", lastFix); geoMsg = "";
+  if(mode !== "follow" || fixBusy){ render(); return; }
+  const la = pos.coords.latitude, lo = pos.coords.longitude;
+  if(place.id === "follow" && distNm(la, lo, place.lat, place.lon) < 3){ render(); return; }  /* only reload after moving 3 nm */
+  fixBusy = true;
+  try{ place = await placeFromFix(la, lo); LS.set("ancon.followPlace", place); D = {err:{}, at:{}}; render(); load(); }
+  finally{ fixBusy = false; }
+}
+function onGeoErr(e){
+  geoMsg = e && e.code === 1
+    ? "Location access is off for this page. Allow it in Settings › Privacy & Security › Location Services › Safari Websites, or pick a preset."
+    : "Can't get a GPS fix right now" + (place.id === "follow" ? "; showing the last known position." : ".");
+  render();
+}
+function startFollow(){
+  if(!navigator.geolocation){ geoMsg = "This browser can't share its location. Pick a preset instead."; render(); return; }
+  if(watchId != null) return;
+  geoMsg = place.id === "follow" ? "" : "Waiting for a GPS fix…"; render();
+  watchId = navigator.geolocation.watchPosition(onFix, onGeoErr, {enableHighAccuracy:false, maximumAge:120000, timeout:30000});
+}
+function stopFollow(){ if(watchId != null) navigator.geolocation.clearWatch(watchId); watchId = null; geoMsg = ""; }
+function buildLocSel(){
+  const s = $("#locSel");
+  s.innerHTML = PRESETS.map(p => `<option value="${p.id}">${p.short}</option>`).join("") + `<option value="follow">Follow iPad location</option>`;
+  s.value = mode;
+}
+$("#locSel").addEventListener("change", e => {
+  const v = e.target.value;
+  mode = v; LS.set("ancon.mode", v);
+  if(v === "follow"){ startFollow(); return; }
+  stopFollow();
+  place = PRESETS.find(p => p.id === v) || PRESETS[0];
+  const cache = LS.get("ancon.cache." + placeKey(place));
+  D = {err:{}, at:{}};
+  if(cache) Object.entries(cache).forEach(([k, o]) => { D[k] = o.v; D.at[k] = o.at; });
+  render(); load();
 });
-$("#btnGeo").addEventListener("click", () => {
-  const msg = $("#geoMsg");
-  if(!navigator.geolocation){ msg.textContent = "Position isn't available in this browser. Enter coordinates by hand."; return; }
-  msg.textContent = "Getting position…";
-  navigator.geolocation.getCurrentPosition(pos => {
-    const la = pos.coords.latitude, lo = pos.coords.longitude;
-    $("#fLat").value = la.toFixed(3); $("#fLon").value = lo.toFixed(3);
-    $("#fMlat").value = la.toFixed(2); $("#fMlon").value = lo.toFixed(2);
-    $("#fName").value = "Current position"; $("#fPreset").value = "custom";
-    msg.textContent = "Position filled in. Move the seas point offshore if you're in a bay, and set the nearest tide station.";
-  }, () => { msg.textContent = "Couldn't get a position. Allow location for Safari, or enter coordinates by hand."; }, {timeout:10000});
-});
-$("#btnPlace").addEventListener("click", () => openSettings($("#settings").hidden));
-$("#btnClose").addEventListener("click", () => openSettings(false));
 $("#btnRefresh").addEventListener("click", load);
 
 /* night red */
@@ -854,8 +892,8 @@ async function getLock(){
 }
 $("#btnWake").addEventListener("click", async () => {
   const b = $("#btnWake");
-  if(wantLock){ wantLock = false; if(lock) lock.release(); b.setAttribute("aria-pressed","false"); b.textContent = "Keep screen on"; return; }
-  if(!("wakeLock" in navigator) || !(await getLock())){ b.textContent = "Screen lock not supported here"; setTimeout(() => b.textContent = "Keep screen on", 3000); return; }
+  if(wantLock){ wantLock = false; if(lock) lock.release(); b.setAttribute("aria-pressed","false"); return; }
+  if(!("wakeLock" in navigator) || !(await getLock())){ b.textContent = "Not supported"; setTimeout(() => b.textContent = "Screen on", 3000); return; }
   wantLock = true; b.setAttribute("aria-pressed","true");
 });
 document.addEventListener("visibilitychange", () => {
@@ -873,7 +911,8 @@ setInterval(render, 60e3);
 (function boot(){
   const cache = LS.get("ancon.cache." + placeKey(place));
   if(cache){ Object.entries(cache).forEach(([k, o]) => { D[k] = o.v; D.at[k] = o.at; }); }
-  initMap(); render(); load();
+  buildLocSel(); initMap(); render(); load();
+  if(mode === "follow") startFollow();
 })();
 </script>
 </body>
