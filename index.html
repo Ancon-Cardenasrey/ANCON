@@ -209,7 +209,7 @@ a{color:var(--accent)}
     <div class="row"><div class="lab"><strong>Wind</strong><span class="key" style="color:var(--c-wind)"><i></i>Speed kt</span><span class="key" style="color:var(--c-gust)"><i class="dash"></i>Gusts kt</span><span class="key">Arrows point downwind</span></div><div class="chart" id="cWind"></div></div>
     <div class="row"><div class="lab"><strong>Rain</strong><span class="key" style="color:var(--c-rain)"><i class="blk"></i>Chance %</span><span class="key" style="color:var(--bad)"><i class="blk"></i>Thunderstorms forecast</span></div><div class="chart" id="cRain"></div></div>
     <div class="row"><div class="lab"><strong>Seas</strong><span class="key" style="color:var(--c-wave)"><i></i>Combined ft</span><span class="key" style="color:var(--c-swell)"><i class="dash"></i>Swell ft</span><span class="key" id="seaLab"></span></div><div class="chart" id="cSea"></div></div>
-    <div class="row"><div class="lab"><strong>Tide</strong><span class="key" style="color:var(--c-tide)"><i></i>Predicted ft above MLLW</span><span class="key" id="tideLab"></span></div><div class="chart" id="cTide"></div></div>
+    <div class="row"><div class="lab"><strong>Tide</strong><span class="key">Predicted ft above MLLW:</span><span class="key" style="color:var(--ok)"><i></i>0.3–1.3 ft</span><span class="key" style="color:var(--bad)"><i></i>Outside 0.3–1.3 ft</span><span class="key" id="tideLab"></span></div><div class="chart" id="cTide"></div></div>
   </section>
 
   <section class="panel">
@@ -431,7 +431,23 @@ function chart(el, cfg){
     });
     if(!d) return;
     if(se.kind === "area") s += `<path d="${d}L${last} ${Y(lo).toFixed(1)}L${first} ${Y(lo).toFixed(1)}Z" fill="${se.color}" opacity=".16"/>`;
-    s += `<path d="${d}" fill="none" stroke="${se.color}" stroke-width="${se.w||2}" stroke-linejoin="round" stroke-linecap="round" ${se.dash?'stroke-dasharray="5 4"':""}/>`;
+    let stroke = se.color, w = se.w || 2;
+    if(se.band){
+      /* Vertical gradient with hard stops: green inside the band, red above or below it */
+      const gid = "band-" + el.id, oc = v => Math.min(1, Math.max(0, Y(v)/Hh)).toFixed(4);
+      const oHi = oc(se.band.hi), oLo = oc(se.band.lo);
+      s += `<defs><linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${Hh}">
+        <stop offset="0" style="stop-color:${se.band.out}"/><stop offset="${oHi}" style="stop-color:${se.band.out}"/>
+        <stop offset="${oHi}" style="stop-color:${se.band.in}"/><stop offset="${oLo}" style="stop-color:${se.band.in}"/>
+        <stop offset="${oLo}" style="stop-color:${se.band.out}"/><stop offset="1" style="stop-color:${se.band.out}"/></linearGradient></defs>`;
+      [se.band.lo, se.band.hi].forEach(v => {
+        const y = Y(v).toFixed(1);
+        s += `<line x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}" stroke="${se.band.in}" stroke-width="1" stroke-dasharray="4 4" opacity=".6"/>`;
+        s += `<text x="${W-m.r-2}" y="${(+y-3).toFixed(1)}" text-anchor="end">${v} ft</text>`;
+      });
+      stroke = `url(#${gid})`; w = se.w || 3;
+    }
+    s += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round" ${se.dash?'stroke-dasharray="5 4"':""}/>`;
   });
   (cfg.arrows||[]).forEach(a => {
     if(a.t < t0 || a.t > t1 || a.deg == null) return;
@@ -751,12 +767,13 @@ function renderCharts(now){
   const ts = tideSeries();
   if(ts && ts.t.length){
     const inWin = ts.v.filter((v,i) => ts.t[i] >= t0 && ts.t[i] <= t1);
-    const mn = Math.min(0, ...inWin), mx = Math.max(...inWin);
+    const mn = Math.min(0, ...inWin), mx = Math.max(1.3, ...inWin);
     const marks = hiloList().map(x => ({t:x.t, v:x.v, color:"var(--c-tide)", label:`${x.type==="H"?"H":"L"} ${r1(x.v)} · ${tm(x.t)}`, below:x.type==="L"}));
     if(D.obs && D.obs.data && D.obs.data[0]){ const o = D.obs.data[0]; marks.push({t:noaaT(o.t), v:parseFloat(o.v), color:"var(--accent)", fill:"var(--accent)", r:3.5}); }
     const pad = (mx-mn)*0.22 || 0.5;
     chart($("#cTide"), Object.assign({}, base, {label:"Predicted tide height in feet", h:160, top:14, yMin:mn - pad, yMax:mx + pad, marks,
-      series:[{name:"Tide", t:ts.t, v:ts.v, kind:"area", color:"var(--c-tide)", fmt:v=>`${r1(v)} ft`}]}));
+      series:[{name:"Tide", t:ts.t, v:ts.v, kind:"area", color:"var(--c-tide)", band:{lo:0.3, hi:1.3, in:"var(--ok)", out:"var(--bad)"},
+        fmt:v=>`${r1(v)} ft · ${v >= 0.3 && v <= 1.3 ? "in range" : "out of range"}`}]}));
     const nm = D.tide && D.tide.metadata && D.tide.metadata.name ? D.tide.metadata.name : place.station;
     $("#tideLab").textContent = `NOAA station ${nm}` + (ts.drawn ? " · curve drawn between predicted highs and lows" : "");
   } else { empty("#cTide", "Tide predictions unavailable. Check the station ID under Location."); $("#tideLab").textContent = ""; }
