@@ -101,6 +101,11 @@ button[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-colo
 .chart svg{display:block;overflow:visible}
 .chart svg text{font:11px var(--f-body);fill:var(--muted)}
 .chart svg text.mk{font:600 11px var(--f-num);fill:var(--ink)}
+.chart svg text.cx{font:600 10.5px var(--f-num);paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}
+.tchg{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12.5px;color:var(--muted);align-items:center;margin-top:2px}
+.tchg b{font-weight:600}
+.tchg .c{display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border-radius:999px;border:1px solid currentColor;font-variant-numeric:tabular-nums}
+.tchg .c.g{color:var(--ok)}.tchg .c.r{color:var(--bad)}
 .tip{position:absolute;top:4px;pointer-events:none;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12.5px;line-height:1.4;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap;z-index:2}
 .tip b{font-weight:600}
 .tip .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
@@ -209,7 +214,7 @@ a{color:var(--accent)}
     <div class="row"><div class="lab"><strong>Wind</strong><span class="key" style="color:var(--c-wind)"><i></i>Speed kt</span><span class="key" style="color:var(--c-gust)"><i class="dash"></i>Gusts kt</span><span class="key">Arrows point downwind</span></div><div class="chart" id="cWind"></div></div>
     <div class="row"><div class="lab"><strong>Rain</strong><span class="key" style="color:var(--c-rain)"><i class="blk"></i>Chance %</span><span class="key" style="color:var(--bad)"><i class="blk"></i>Thunderstorms forecast</span></div><div class="chart" id="cRain"></div></div>
     <div class="row"><div class="lab"><strong>Seas</strong><span class="key" style="color:var(--c-wave)"><i></i>Combined ft</span><span class="key" style="color:var(--c-swell)"><i class="dash"></i>Swell ft</span><span class="key" id="seaLab"></span></div><div class="chart" id="cSea"></div></div>
-    <div class="row"><div class="lab"><strong>Tide</strong><span class="key">Predicted ft above MLLW:</span><span class="key" style="color:var(--ok)"><i></i>0.3–1.3 ft</span><span class="key" style="color:var(--bad)"><i></i>Outside 0.3–1.3 ft</span><span class="key" id="tideLab"></span></div><div class="chart" id="cTide"></div></div>
+    <div class="row"><div class="lab"><strong>Tide</strong><span class="key">Predicted ft above MLLW:</span><span class="key" style="color:var(--ok)"><i></i>0.3–1.3 ft</span><span class="key" style="color:var(--bad)"><i></i>Outside 0.3–1.3 ft</span><span class="key" id="tideLab"></span></div><div class="chart" id="cTide"></div><div class="tchg" id="tideChanges"></div></div>
   </section>
 
   <section class="panel">
@@ -430,8 +435,7 @@ function chart(el, cfg){
       if(first==null) first = x; last = x;
     });
     if(!d) return;
-    if(se.kind === "area") s += `<path d="${d}L${last} ${Y(lo).toFixed(1)}L${first} ${Y(lo).toFixed(1)}Z" fill="${se.color}" opacity=".16"/>`;
-    let stroke = se.color, w = se.w || 2;
+    let stroke = se.color, w = se.w || 2, fill = se.color, fop = ".16";
     if(se.band){
       /* Vertical gradient with hard stops: green inside the band, red above or below it */
       const gid = "band-" + el.id, oc = v => Math.min(1, Math.max(0, Y(v)/Hh)).toFixed(4);
@@ -445,19 +449,46 @@ function chart(el, cfg){
         s += `<line x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}" stroke="${se.band.in}" stroke-width="1" stroke-dasharray="4 4" opacity=".6"/>`;
         s += `<text x="${W-m.r-2}" y="${(+y-3).toFixed(1)}" text-anchor="end">${v} ft</text>`;
       });
-      stroke = `url(#${gid})`; w = se.w || 3;
+      stroke = `url(#${gid})`; w = se.w || 3; fop = ".26";
+      /* Fill changes color left to right at each crossing time, so each slice under the curve matches its line */
+      const inB = v => v >= se.band.lo && v <= se.band.hi, col = g => g ? se.band.in : se.band.out;
+      const fid = "bandx-" + el.id, ox = t => Math.min(1, Math.max(0, X(t)/W)).toFixed(4);
+      let g0 = inB(se.v[nearest(se.t, t0)]), stops = `<stop offset="0" style="stop-color:${col(g0)}"/>`;
+      (cfg.cross||[]).forEach(c => { if(c.t <= t0 || c.t >= t1) return;
+        stops += `<stop offset="${ox(c.t)}" style="stop-color:${col(!c.toGreen)}"/><stop offset="${ox(c.t)}" style="stop-color:${col(c.toGreen)}"/>`; g0 = c.toGreen; });
+      stops += `<stop offset="1" style="stop-color:${col(g0)}"/>`;
+      s += `<defs><linearGradient id="${fid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${W}" y2="0">${stops}</linearGradient></defs>`;
+      fill = `url(#${fid})`;
     }
+    if(se.kind === "area") s += `<path d="${d}L${last} ${Y(lo).toFixed(1)}L${first} ${Y(lo).toFixed(1)}Z" fill="${fill}" opacity="${fop}"/>`;
     s += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round" ${se.dash?'stroke-dasharray="5 4"':""}/>`;
   });
   (cfg.arrows||[]).forEach(a => {
     if(a.t < t0 || a.t > t1 || a.deg == null) return;
     s += `<g transform="translate(${X(a.t).toFixed(1)} ${(m.t/2+1).toFixed(1)}) rotate(${(a.deg+180)%360})"><path d="M0 -6 L4 4 L0 1.6 L-4 4 Z" fill="var(--c-wind)"/></g>`;
   });
+  /* Labels avoid each other: each takes a box; a label that would overlap a placed one tries its other side, else is skipped. */
+  const boxes = [], tw = (txt, px) => txt.length * px * 0.56;
+  const fits = b => b.x1 >= m.l && b.x2 <= W-m.r && b.y1 >= 0 && b.y2 <= m.t+ih && !boxes.some(o => b.x1 < o.x2 && b.x2 > o.x1 && b.y1 < o.y2 && b.y2 > o.y1);
   (cfg.marks||[]).forEach(k => {
     if(k.t < t0 || k.t > t1) return;
     const x = X(k.t), y = Y(k.v);
     s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${k.r||3}" fill="${k.fill||"var(--panel)"}" stroke="${k.color}" stroke-width="2"/>`;
-    if(k.label) s += `<text class="mk" x="${Math.min(Math.max(x, m.l+14), W-m.r-14).toFixed(1)}" y="${(k.below ? y+15 : y-7).toFixed(1)}" text-anchor="middle">${k.label}</text>`;
+    if(k.label){
+      const lx = Math.min(Math.max(x, m.l+14), W-m.r-14), ly = k.below ? y+15 : y-7, hw = tw(k.label, 11)/2;
+      boxes.push({x1:lx-hw, x2:lx+hw, y1:ly-10, y2:ly+2});
+      s += `<text class="mk" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle">${k.label}</text>`;
+    }
+  });
+  (cfg.cross||[]).forEach(c => {
+    if(c.t < t0 || c.t > t1) return;
+    const x = X(c.t), y = Y(c.v);
+    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="${c.color}" stroke="var(--panel)" stroke-width="1.5"/>`;
+    const hw = tw(c.label, 10.5)/2 + 2;
+    for(const above of [c.above, !c.above]){
+      const ly = above ? y-6 : y+14, b = {x1:x-hw, x2:x+hw, y1:ly-10, y2:ly+2};
+      if(fits(b)){ boxes.push(b); s += `<text class="cx" x="${x.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" style="fill:${c.color}">${c.label}</text>`; break; }
+    }
   });
   s += `</g>`;
   const nx = X(cfg.now).toFixed(1);
@@ -771,12 +802,40 @@ function renderCharts(now){
     const marks = hiloList().map(x => ({t:x.t, v:x.v, color:"var(--c-tide)", label:`${x.type==="H"?"H":"L"} ${r1(x.v)} · ${tm(x.t)}`, below:x.type==="L"}));
     if(D.obs && D.obs.data && D.obs.data[0]){ const o = D.obs.data[0]; marks.push({t:noaaT(o.t), v:parseFloat(o.v), color:"var(--accent)", fill:"var(--accent)", r:3.5}); }
     const pad = (mx-mn)*0.22 || 0.5;
-    chart($("#cTide"), Object.assign({}, base, {label:"Predicted tide height in feet", h:160, top:14, yMin:mn - pad, yMax:mx + pad, marks,
-      series:[{name:"Tide", t:ts.t, v:ts.v, kind:"area", color:"var(--c-tide)", band:{lo:0.3, hi:1.3, in:"var(--ok)", out:"var(--bad)"},
-        fmt:v=>`${r1(v)} ft · ${v >= 0.3 && v <= 1.3 ? "in range" : "out of range"}`}]}));
+    /* Times the tide crosses 0.3 or 1.3 ft, interpolated between curve points: where the line turns green or red */
+    const BLO = 0.3, BHI = 1.3, inBand = v => v >= BLO && v <= BHI;
+    const cross = [];
+    for(let i=0;i<ts.t.length-1;i++){
+      const a = ts.v[i], b = ts.v[i+1];
+      [BLO, BHI].forEach(L => {
+        if((a-L)*(b-L) < 0){
+          const t = ts.t[i] + (ts.t[i+1]-ts.t[i]) * (L-a)/(b-a);
+          const toGreen = inBand(b), hhmm = fmt(t,{hour:"numeric",minute:"2-digit"}).replace(/\s?([AP])M$/i, (_, p) => p.toLowerCase());
+          cross.push({t, v:L, toGreen, color: toGreen ? "var(--ok)" : "var(--bad)", label: hhmm, above: L === BHI});
+        }
+      });
+    }
+    cross.sort((p, q) => p.t - q.t);
+    chart($("#cTide"), Object.assign({}, base, {label:"Predicted tide height in feet", h:170, top:14, yMin:mn - pad, yMax:mx + pad, marks, cross,
+      series:[{name:"Tide", t:ts.t, v:ts.v, kind:"area", color:"var(--c-tide)", band:{lo:BLO, hi:BHI, in:"var(--ok)", out:"var(--bad)"},
+        fmt:v=>`${r1(v)} ft · ${inBand(v) ? "in range" : "out of range"}`}]}));
+    /* Text list of the next changes, so every time is readable even where the chart has no room for its label */
+    const nowIn = (() => { const i = idxAt(ts.t, now); return inBand(ts.v[i]); })();
+    const next = cross.filter(c => c.t > now && c.t <= t1).slice(0, 8);
+    const box = $("#tideChanges"); box.textContent = "";
+    const head = document.createElement("span");
+    head.innerHTML = `Now <b style="color:${nowIn ? "var(--ok)" : "var(--bad)"}">${nowIn ? "green" : "red"}</b>${next.length ? " · changes:" : " · no change in the next 48 h"}`;
+    box.appendChild(head);
+    next.forEach(c => {
+      const el = document.createElement("span");
+      el.className = "c " + (c.toGreen ? "g" : "r");
+      el.textContent = `${c.toGreen ? "Green" : "Red"} ${tmD(c.t)}`;
+      el.title = `${c.toGreen ? "Enters" : "Leaves"} 0.3–1.3 ft at ${c.v} ft`;
+      box.appendChild(el);
+    });
     const nm = D.tide && D.tide.metadata && D.tide.metadata.name ? D.tide.metadata.name : place.station;
     $("#tideLab").textContent = `NOAA station ${nm}` + (ts.drawn ? " · curve drawn between predicted highs and lows" : "");
-  } else { empty("#cTide", "Tide predictions unavailable. Check the station ID under Location."); $("#tideLab").textContent = ""; }
+  } else { empty("#cTide", "Tide predictions unavailable. Check the station ID under Location."); $("#tideLab").textContent = ""; $("#tideChanges").textContent = ""; }
 }
 
 function renderDaily(){
